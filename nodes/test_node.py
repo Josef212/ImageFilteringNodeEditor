@@ -37,5 +37,5 @@ class TestNode(BaseNode):
     def get_input_attributes(self):
         return [self.input1_atr, self.input2_atr]
 
-    def get_output(self):
+    def get_output(self, inputs):
         pass

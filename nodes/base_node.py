@@ -15,5 +15,5 @@ class BaseNode(ABC):
         pass
 
     @abstractmethod
-    def get_output(self):
+    def get_output(self, inputs):
         pass

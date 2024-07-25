@@ -34,3 +34,28 @@ def load_texture(img_path):
         tag = dpg.add_dynamic_texture(width=width, height=height, default_value=dpg_image, label=img_path)
 
     return img, tag
+
+def calculate_output_image_window():
+    window_width = 350
+    window_height = 320
+    viewport_width = dpg.get_viewport_width()
+    viewport_height = dpg.get_viewport_height()
+    extra_margin_x = 25
+    extra_margin_y = 48
+    image_width = window_width * 0.95
+    image_height = (window_height - 60)
+
+    window_pos = (viewport_width - window_width - extra_margin_x, viewport_height - window_height - extra_margin_y)
+    window_size = (window_width, window_height)
+    image_size = (image_width, image_height)
+
+
+    return (window_pos, window_size, image_size)
+
+def load_default_textures():
+    with dpg.texture_registry(show=False):
+        black_tex = generate_plain_texture((100, 100), (0 / 255, 0 / 255, 0 / 255, 255 / 255))
+        dpg.add_dynamic_texture(width=100, height=100, default_value=black_tex, tag=BLACK_TEXTURE, label="BLACK_TEX")#, format=dpg.mvFormat_Float_rgba)
+
+        white_tex = generate_plain_texture((100, 100), (255 / 255, 255 / 255, 255 / 255, 255 / 255))
+        dpg.add_dynamic_texture(width=100, height=100, default_value=white_tex, tag=WHITE_TEXTURE, label="WHITE_TEX")#, format=dpg.mvFormat_Float_rgba)

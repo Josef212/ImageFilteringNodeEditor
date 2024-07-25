@@ -34,5 +34,5 @@ class DstNode(BaseNode):
     def get_input_attributes(self):
         return [self.input_atr]
 
-    def get_output(self):
+    def get_output(self, inputs):
         pass

@@ -52,5 +52,5 @@ class SourceNode(BaseNode):
     def get_input_attributes(self):
         return []
 
-    def get_output(self):
+    def get_output(self, inputs):
         pass
