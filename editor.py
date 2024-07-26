@@ -11,6 +11,7 @@ from nodes.test_node import *
 from nodes.const_node import *
 
 OUTPUT_IMAGE_ITEM_TAG = "img_item"
+OUTPUT_WINDOW_TAG = "output_window"
 
 atr_to_node = {}
 def node_added(node):
@@ -115,7 +116,7 @@ def create_const_node(sender, app_data, user_data):
 
 def on_viewport_updated():
     (window_pos, _, __) = calculate_output_image_window()
-    dpg.set_item_pos("output_window", window_pos)
+    dpg.set_item_pos(OUTPUT_WINDOW_TAG, window_pos)
 
 def app():
     load_default_textures()
@@ -129,7 +130,7 @@ def app():
             link_callback(editor, (def_src.output_atr, def_dst.input_atr))
 
     (window_pos, window_size, image_size) = calculate_output_image_window()
-    with dpg.window(label="Output image", tag="output_window", no_close=True, no_collapse=True, no_resize=True, pos=window_pos, width=window_size[0], height=window_size[1]) as prev_window:
+    with dpg.window(label="Output image", tag=OUTPUT_WINDOW_TAG, no_close=True, no_collapse=True, no_resize=True, pos=window_pos, width=window_size[0], height=window_size[1]) as prev_window:
         image_item = dpg.add_image(BLACK_TEXTURE, width=image_size[0], height=image_size[1], tag=OUTPUT_IMAGE_ITEM_TAG)
         dpg.add_button(label="Save image", callback=update_image_texture, tag="btn", user_data=image_item)
 
@@ -151,9 +152,6 @@ def app():
             dpg.add_menu_item(label="Debug tool", callback=lambda: dpg.show_tool(dpg.mvTool_Debug))
 
     dpg.set_primary_window("PrimaryWindow", True)
-
-    for (atr, node) in atr_to_node.items():
-        print(atr)
 
 def main():
     dpg.create_context()
