@@ -9,6 +9,11 @@ from nodes.source_node import *
 from nodes.dst_node import *
 from nodes.test_node import *
 from nodes.const_node import *
+from nodes.gaussian_blur_node import *
+from nodes.invert_node import *
+from nodes.canny_node import *
+from nodes.weighted_merge_node import *
+from nodes.one_to_n_channels_node import *
 
 OUTPUT_IMAGE_ITEM_TAG = "img_item"
 OUTPUT_WINDOW_TAG = "output_window"
@@ -77,10 +82,13 @@ def apply_output(sender, app_data, user_data):
     # print(output)
 
     if output is not None:
-        height, width, _ = output.shape
+        height, width, channels = output.shape
         dpg_output = convert_cv_to_dpg_image(output)
-        output_texture_tag = register_dpg_texture(dpg_output, "Output image", width, height)
+        output_texture_tag = register_dpg_texture(dpg_output, "Output image", width, height, True)
         dpg.configure_item(OUTPUT_IMAGE_ITEM_TAG, texture_tag=output_texture_tag)
+
+        # with dpg.window(label="Aaaa"):
+        #     dpg.add_image(output_texture_tag, width=300, height=250)
 
 def create_source_node(sender, app_data, user_data):
     # user_data is the editor id
@@ -109,6 +117,46 @@ def create_test_node(sender, app_data, user_data):
 def create_const_node(sender, app_data, user_data):
     # user_data is the editor id
     node = ConstNode()
+    node.build_dpg(user_data)
+    node_added(node)
+
+    return node
+
+def create_gaussian_blur_node(sender, app_data, user_data):
+    # user_data is the editor id
+    node = GaussianBlurNode()
+    node.build_dpg(user_data)
+    node_added(node)
+
+    return node
+
+def create_invert_node(sender, app_data, user_data):
+    # user_data is the editor id
+    node = InvertNode()
+    node.build_dpg(user_data)
+    node_added(node)
+
+    return node
+
+def create_canny_node(sender, app_data, user_data):
+    # user_data is the editor id
+    node = CannyNode()
+    node.build_dpg(user_data)
+    node_added(node)
+
+    return node
+
+def create_weighted_merge_node(sender, app_data, user_data):
+    # user_data is the editor id
+    node = WeightedMergeNode()
+    node.build_dpg(user_data)
+    node_added(node)
+
+    return node
+
+def create_one_to_n_channels_node(sender, app_data, user_data):
+    # user_data is the editor id
+    node = OneToNChannels()
     node.build_dpg(user_data)
     node_added(node)
 
@@ -146,6 +194,11 @@ def app():
             dpg.add_menu_item(label="Dst", callback=create_dst_node, user_data=editor)
             dpg.add_menu_item(label="Test", callback=create_test_node, user_data=editor)
             dpg.add_menu_item(label="Const", callback=create_const_node, user_data=editor)
+            dpg.add_menu_item(label="GaussianBlur", callback=create_gaussian_blur_node, user_data=editor)
+            dpg.add_menu_item(label="Invert", callback=create_invert_node, user_data=editor)
+            dpg.add_menu_item(label="Canny", callback=create_canny_node, user_data=editor)
+            dpg.add_menu_item(label="Weighted merge", callback=create_weighted_merge_node, user_data=editor)
+            dpg.add_menu_item(label="One to n channels", callback=create_one_to_n_channels_node, user_data=editor)
 
         with dpg.menu(label="Tools"):
             dpg.add_menu_item(label="Item registry", callback=lambda: dpg.show_tool(dpg.mvTool_ItemRegistry))
