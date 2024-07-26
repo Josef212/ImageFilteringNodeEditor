@@ -14,9 +14,6 @@ class InvertNode(BaseNode):
         pass
 
     def build_dpg(self, editor):
-        def update_value(sender, app_data, user_data):
-            user_data.value = app_data
-
         with dpg.node(label="Invert", parent=editor) as node:
             with dpg.node_attribute(label="InputAtr", attribute_type=dpg.mvNode_Attr_Input) as in_atr:
                 dpg.add_text(label="Input")

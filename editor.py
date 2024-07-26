@@ -84,7 +84,7 @@ def apply_output(sender, app_data, user_data):
     if output is not None:
         height, width, channels = output.shape
         dpg_output = convert_cv_to_dpg_image(output)
-        output_texture_tag = register_dpg_texture(dpg_output, "Output image", width, height, True)
+        output_texture_tag = register_dpg_texture(dpg_output, "Output image", width, height, False)
         dpg.configure_item(OUTPUT_IMAGE_ITEM_TAG, texture_tag=output_texture_tag)
 
         # with dpg.window(label="Aaaa"):

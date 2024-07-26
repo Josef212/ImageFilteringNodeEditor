@@ -2,7 +2,8 @@ import dearpygui.dearpygui as dpg
 import cv2
 import numpy as np
 
-IMG_NAME = "test_image.jpg"
+# IMG_NAME = "test_image.jpg"
+IMG_NAME = "kholin.jpg"
 WHITE_TEXTURE = "white_texture"
 BLACK_TEXTURE = "black_texture"
 
@@ -39,8 +40,8 @@ def load_texture(img_path):
     return img, tag
 
 def calculate_output_image_window():
-    window_width = 350
-    window_height = 320
+    window_width = 500#350
+    window_height = 450#320
     viewport_width = dpg.get_viewport_width()
     viewport_height = dpg.get_viewport_height()
     extra_margin_x = 25

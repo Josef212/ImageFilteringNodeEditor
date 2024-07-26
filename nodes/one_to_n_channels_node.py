@@ -10,18 +10,17 @@ class OneToNChannels(BaseNode):
     input_atr = None
     output_atr = None
     channel_count = 4
-    # TODO: Add channel count input field
 
     def __init__(self):
         pass
 
     def build_dpg(self, editor):
         def update_value(sender, app_data, user_data):
-            user_data.value = app_data
+            user_data.channel_count = app_data
 
         with dpg.node(label="One to n channels", parent=editor) as node:
             with dpg.node_attribute(label="InputAtr", attribute_type=dpg.mvNode_Attr_Input) as in_atr:
-                dpg.add_text(label="Input")
+                dpg.add_input_int(label="Channels", width=150, callback=update_value, user_data=self, default_value=self.channel_count)
             with dpg.node_attribute(label="OutputAtr", attribute_type=dpg.mvNode_Attr_Output) as out_atr:
                 dpg.add_text(label="Output")
 
