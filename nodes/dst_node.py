@@ -34,5 +34,7 @@ class DstNode(BaseNode):
     def get_input_attributes(self):
         return [self.input_atr]
 
-    def get_output(self, inputs):
-        pass
+    def get_output(self, tree):
+        input_tree_node = tree.children[0]
+        input_node = input_tree_node.value
+        return input_node.get_output(input_tree_node)

@@ -52,5 +52,5 @@ class SourceNode(BaseNode):
     def get_input_attributes(self):
         return []
 
-    def get_output(self, inputs):
-        pass
+    def get_output(self, tree):
+        return self.cv_image

@@ -10,6 +10,8 @@ from nodes.dst_node import *
 from nodes.test_node import *
 from nodes.const_node import *
 
+OUTPUT_IMAGE_ITEM_TAG = "img_item"
+
 atr_to_node = {}
 def node_added(node):
     attributes = node.get_all_attributes()
@@ -46,6 +48,14 @@ def update_image_texture(sender, app_data, user_data):
     cv_image, dpg_tag = load_texture(IMG_NAME)
     dpg.configure_item(user_data, texture_tag=dpg_tag)
 
+def rec_build_node_tree(tree_parent_node, input_nodes):
+    for node in input_nodes:
+        tree_node = Node(node.get_debug_name(), parent=tree_parent_node)
+        tree_node.value = node
+        rec_input_nodes = [atr_to_node[get_output_atr_from_input_atr(atr)] for atr in node.get_input_attributes()]
+        if len(rec_input_nodes) > 0:
+            rec_build_node_tree(tree_node, rec_input_nodes)
+
 def build_node_tree(dst_node):
     # TODO: This breaks if any link is missing
 
@@ -57,19 +67,19 @@ def build_node_tree(dst_node):
     for pre, fill, node in RenderTree(tree_root_node):
         print("%s%s" % (pre, node.name))
 
-    # print(tree_root_node.children[0])
-
-def rec_build_node_tree(tree_parent_node, input_nodes):
-    for node in input_nodes:
-        tree_node = Node(node.get_debug_name(), parent=tree_parent_node)
-        tree_node.value = node
-        rec_input_nodes = [atr_to_node[get_output_atr_from_input_atr(atr)] for atr in node.get_input_attributes()]
-        if len(rec_input_nodes) > 0:
-            rec_build_node_tree(tree_node, rec_input_nodes)
+    return tree_root_node
 
 def apply_output(sender, app_data, user_data):
     # user_data is the destination node
-    build_node_tree(user_data)
+    tree = build_node_tree(user_data)
+    output = tree.value.get_output(tree)
+    # print(output)
+
+    if output is not None:
+        height, width, _ = output.shape
+        dpg_output = convert_cv_to_dpg_image(output)
+        output_texture_tag = register_dpg_texture(dpg_output, "Output image", width, height)
+        dpg.configure_item(OUTPUT_IMAGE_ITEM_TAG, texture_tag=output_texture_tag)
 
 def create_source_node(sender, app_data, user_data):
     # user_data is the editor id
@@ -114,13 +124,13 @@ def app():
         with dpg.node_editor(callback=link_callback, delink_callback=delink_callback) as editor:
             def_src = create_source_node(None, None, editor)
             def_dst = create_dst_node(None, None, editor)
-            create_test_node(None, None, editor)
-            create_const_node(None,None, editor)
-            # link_callback(editor, (def_src.output_atr, def_dst.input_atr))
+            # create_test_node(None, None, editor)
+            # create_const_node(None,None, editor)
+            link_callback(editor, (def_src.output_atr, def_dst.input_atr))
 
     (window_pos, window_size, image_size) = calculate_output_image_window()
     with dpg.window(label="Output image", tag="output_window", no_close=True, no_collapse=True, no_resize=True, pos=window_pos, width=window_size[0], height=window_size[1]) as prev_window:
-        image_item = dpg.add_image(BLACK_TEXTURE, width=image_size[0], height=image_size[1], tag="img_item")
+        image_item = dpg.add_image(BLACK_TEXTURE, width=image_size[0], height=image_size[1], tag=OUTPUT_IMAGE_ITEM_TAG)
         dpg.add_button(label="Save image", callback=update_image_texture, tag="btn", user_data=image_item)
 
     with dpg.viewport_menu_bar():

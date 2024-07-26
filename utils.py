@@ -23,15 +23,18 @@ def generate_plain_texture(shape, color):
 
     return data
 
+def register_dpg_texture(data, label, width, height, show_registry=False):
+    tag = None
+    with dpg.texture_registry(show=show_registry):
+        tag = dpg.add_dynamic_texture(width=width, height=height, default_value=data, label=label)
+
+    return tag
+
 def load_texture(img_path):
     img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
     height, width, _ = img.shape
     dpg_image = convert_cv_to_dpg_image(img)
-
-    tag = None
-
-    with dpg.texture_registry(show=False):
-        tag = dpg.add_dynamic_texture(width=width, height=height, default_value=dpg_image, label=img_path)
+    tag = register_dpg_texture(dpg_image, img_path, width, height)
 
     return img, tag
 
