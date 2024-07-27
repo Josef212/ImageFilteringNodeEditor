@@ -9,9 +9,6 @@ class DstNode(BaseNode):
     node = None
     input_atr = None
 
-    image_item = None
-
-    image_texture_tag = None
     cv_image = None
 
     def __init__(self):
@@ -35,6 +32,11 @@ class DstNode(BaseNode):
         return [self.input_atr]
 
     def get_output(self, tree):
+        if self.cv_image is not None:
+            self.cv_image = None
+
         input_tree_node = tree.children[0]
         input_node = input_tree_node.value
-        return input_node.get_output(input_tree_node)
+        self.cv_image = input_node.get_output(input_tree_node)
+
+        return self.cv_image

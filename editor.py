@@ -20,12 +20,14 @@ OUTPUT_WINDOW_TAG = "output_window"
 
 atr_to_node = {}
 def node_added(node):
+    global atr_to_node
     attributes = node.get_all_attributes()
     for atr in attributes:
         atr_to_node[atr] = node
 
 input_output_links = {} # link_id : (input_atr, output_atr)
 def get_output_atr_from_input_atr(input_atr):
+    global input_output_links
     for _, pair in input_output_links.items():
         if pair[0] == input_atr:
             return pair[1]
@@ -39,12 +41,14 @@ def link_callback(sender, app_data):
     #   No recursion ???
     # print(f"Linking. 0: {app_data[0]} 1: {app_data[1]} S: {sender}")
 
+    global input_output_links
     link = dpg.add_node_link(app_data[0], app_data[1], parent=sender)
     input_output_links[link] = (app_data[1], app_data[0])
 
 def delink_callback(sender, app_data):
     # app_data -> link_id
 
+    global input_output_links
     del input_output_links[app_data]
     dpg.delete_item(app_data)
 
@@ -75,18 +79,25 @@ def build_node_tree(dst_node):
 
     return tree_root_node
 
+output_image_texture_tag = None
 def apply_output(sender, app_data, user_data):
     # user_data is the destination node
     tree = build_node_tree(user_data)
     output = tree.value.get_output(tree)
-    # print(output)
+
+    global output_image_texture_tag
+    if output_image_texture_tag is not None:
+        dpg.delete_item(output_image_texture_tag)
+        output_image_texture_tag = None
 
     if output is not None:
         height, width, channels = output.shape
         dpg_output = convert_cv_to_dpg_image(output)
-        output_texture_tag = register_dpg_texture(dpg_output, "Output image", width, height, False)
-        dpg.configure_item(OUTPUT_IMAGE_ITEM_TAG, texture_tag=output_texture_tag)
+        output_image_texture_tag = register_dpg_texture(dpg_output, "Output image", width, height, False)
 
+
+    output_texture_tag = BLACK_TEXTURE if output_image_texture_tag is None else output_image_texture_tag
+    dpg.configure_item(OUTPUT_IMAGE_ITEM_TAG, texture_tag=output_texture_tag)
         # with dpg.window(label="Aaaa"):
         #     dpg.add_image(output_texture_tag, width=300, height=250)
 
