@@ -14,6 +14,11 @@ from nodes.invert_node import *
 from nodes.canny_node import *
 from nodes.weighted_merge_node import *
 from nodes.one_to_n_channels_node import *
+from nodes.oil_node import *
+from nodes.stylization_node import *
+from nodes.hdr_node import *
+from nodes.embossed_edges import *
+from nodes.resize_node import *
 
 OUTPUT_IMAGE_ITEM_TAG = "img_item"
 OUTPUT_WINDOW_TAG = "output_window"
@@ -101,14 +106,6 @@ def apply_output(sender, app_data, user_data):
         # with dpg.window(label="Aaaa"):
         #     dpg.add_image(output_texture_tag, width=300, height=250)
 
-def create_source_node(sender, app_data, user_data):
-    # user_data is the editor id
-    node = SourceNode()
-    node.build_dpg(user_data)
-    node_added(node)
-
-    return node
-
 def create_dst_node(sender, app_data, user_data):
     # user_data is the editor id
     node = DstNode()
@@ -117,58 +114,9 @@ def create_dst_node(sender, app_data, user_data):
 
     return node
 
-def create_test_node(sender, app_data, user_data):
-    # user_data is the editor id
-    node = TestNode()
-    node.build_dpg(user_data)
-    node_added(node)
-
-    return node
-
-def create_const_node(sender, app_data, user_data):
-    # user_data is the editor id
-    node = ConstNode()
-    node.build_dpg(user_data)
-    node_added(node)
-
-    return node
-
-def create_gaussian_blur_node(sender, app_data, user_data):
-    # user_data is the editor id
-    node = GaussianBlurNode()
-    node.build_dpg(user_data)
-    node_added(node)
-
-    return node
-
-def create_invert_node(sender, app_data, user_data):
-    # user_data is the editor id
-    node = InvertNode()
-    node.build_dpg(user_data)
-    node_added(node)
-
-    return node
-
-def create_canny_node(sender, app_data, user_data):
-    # user_data is the editor id
-    node = CannyNode()
-    node.build_dpg(user_data)
-    node_added(node)
-
-    return node
-
-def create_weighted_merge_node(sender, app_data, user_data):
-    # user_data is the editor id
-    node = WeightedMergeNode()
-    node.build_dpg(user_data)
-    node_added(node)
-
-    return node
-
-def create_one_to_n_channels_node(sender, app_data, user_data):
-    # user_data is the editor id
-    node = OneToNChannels()
-    node.build_dpg(user_data)
+def create_node(builder_cbk, editor):
+    node = builder_cbk()
+    node.build_dpg(editor)
     node_added(node)
 
     return node
@@ -182,11 +130,11 @@ def app():
 
     with dpg.window(label="Node editor", tag="PrimaryWindow"):
         with dpg.node_editor(callback=link_callback, delink_callback=delink_callback) as editor:
-            def_src = create_source_node(None, None, editor)
+            def_src = create_node(SourceNode, editor)
             def_dst = create_dst_node(None, None, editor)
             # create_test_node(None, None, editor)
             # create_const_node(None,None, editor)
-            link_callback(editor, (def_src.output_atr, def_dst.input_atr))
+            # link_callback(editor, (def_src.output_atr, def_dst.input_atr))
 
     (window_pos, window_size, image_size) = calculate_output_image_window()
     with dpg.window(label="Output image", tag=OUTPUT_WINDOW_TAG, no_close=True, no_collapse=True, no_resize=True, pos=window_pos, width=window_size[0], height=window_size[1]) as prev_window:
@@ -201,15 +149,38 @@ def app():
         dpg.add_menu_item(label="Help", callback=lambda: print("Helping"))
 
         with dpg.menu(label="Nodes"):
-            dpg.add_menu_item(label="Source", callback=create_source_node, user_data=editor)
-            dpg.add_menu_item(label="Dst", callback=create_dst_node, user_data=editor)
-            dpg.add_menu_item(label="Test", callback=create_test_node, user_data=editor)
-            dpg.add_menu_item(label="Const", callback=create_const_node, user_data=editor)
-            dpg.add_menu_item(label="GaussianBlur", callback=create_gaussian_blur_node, user_data=editor)
-            dpg.add_menu_item(label="Invert", callback=create_invert_node, user_data=editor)
-            dpg.add_menu_item(label="Canny", callback=create_canny_node, user_data=editor)
-            dpg.add_menu_item(label="Weighted merge", callback=create_weighted_merge_node, user_data=editor)
-            dpg.add_menu_item(label="One to n channels", callback=create_one_to_n_channels_node, user_data=editor)
+            with dpg.menu(label="Data"):
+                data_nodes = [
+                    ("Source", lambda: create_node(SourceNode, editor)),
+                    ("Dst", create_dst_node),
+                    ("Const", lambda: create_node(ConstNode, editor))
+                ]
+                for label, cbk in data_nodes:
+                    dpg.add_menu_item(label=label, callback=cbk, user_data=editor)
+
+            with dpg.menu(label="Utils"):
+                utils_nodes = [
+                    ("Weighted merge", lambda: create_node(WeightedMergeNode, editor)),
+                    ("One to n channels", lambda: create_node(OneToNChannels, editor))
+                    ("Resize", lambda: create_node(ResizeNode, editor)),
+                ]
+                for label, cbk in utils_nodes:
+                    dpg.add_menu_item(label=label, callback=cbk, user_data=editor)
+
+            with dpg.menu(label="Effects"):
+                effect_nodes = [
+                    ("GaussianBlur", lambda: create_node(GaussianBlurNode, editor)),
+                    ("Invert", lambda: create_node(InvertNode, editor)),
+                    ("Canny", lambda: create_node(CannyNode, editor)),
+                    ("Oil", lambda: create_node(OilNode, editor)),
+                    ("Stylization", lambda: create_node(StylizationNode, editor)),
+                    ("Hdr", lambda: create_node(HdrNode, editor)),
+                    ("EmbossedEdgesNode", lambda: create_node(EmbossedEdgesNode, editor))
+                ]
+                for label, cbk in effect_nodes:
+                    dpg.add_menu_item(label=label, callback=cbk, user_data=editor)
+
+            dpg.add_menu_item(label="Test", callback=lambda: create_node(TestNode, editor), user_data=editor)
 
         with dpg.menu(label="Tools"):
             dpg.add_menu_item(label="Item registry", callback=lambda: dpg.show_tool(dpg.mvTool_ItemRegistry))

@@ -5,27 +5,24 @@ import numpy as np
 from nodes.base_node import BaseNode
 from utils import *
 
-class CannyNode(BaseNode):
+# TODO: Should add resize modes
+class ResizeNode(BaseNode):
     node = None
     input_atr = None
     output_atr = None
-    threshold1 = 100
-    threshold2 = 200
+    percentage = 50
 
     def __init__(self):
         pass
 
     def build_dpg(self, editor):
-        def update_threshold(sender, app_data, user_data):
-            if user_data[1] == 1:
-                user_data[0].threshold1 = app_data
-            elif user_data[1] == 2:
-                user_data[0].threshold2 = app_data
+        def update_value(sender, app_data, user_data):
+            if user_data == 1:
+                user_data.percentage = app_data
 
-        with dpg.node(label="Canny edges", parent=editor) as node:
+        with dpg.node(label="Resize", parent=editor) as node:
             with dpg.node_attribute(label="InputAtr", attribute_type=dpg.mvNode_Attr_Input) as in_atr:
-                dpg.add_input_int(label="Threshold 1", width=150, callback=update_threshold, user_data=(self, 1), default_value=self.threshold1)
-                dpg.add_input_int(label="Threshold 2", width=150, callback=update_threshold, user_data=(self, 2), default_value=self.threshold2)
+                dpg.add_input_int(label="Resize percentage", width=150, callback=update_value, user_data=self, default_value=self.percentage)
 
             with dpg.node_attribute(label="OutputAtr", attribute_type=dpg.mvNode_Attr_Output) as out_atr:
                 dpg.add_text("Output")
@@ -38,7 +35,7 @@ class CannyNode(BaseNode):
         return [self.input_atr, self.output_atr]
 
     def get_debug_name(self):
-        return "CannyNode"
+        return "ResizeNode"
 
     def get_input_attributes(self):
         return [self.input_atr]
@@ -47,6 +44,11 @@ class CannyNode(BaseNode):
         input_tree_node = tree.children[0]
         input_node = input_tree_node.value
         img = input_node.get_output(input_tree_node)
-        canny_edges = cv2.Canny(img, threshold1=self.threshold1, threshold2=self.threshold2)
+        height, width, _ = img.shape
+        target_width = width * (self.percentage / 100.0)
+        target_height = height * (self.percentage / 100.0)
 
-        return canny_edges
+        # TODO: Expose the interpolation as field
+        ret = cv2.resize(img, (w, h), interpolation = cv2.INTER_AREA)
+
+        return ret
