@@ -90,6 +90,8 @@ def apply_output(sender, app_data, user_data):
     tree = build_node_tree(user_data)
     output = tree.value.get_output(tree)
 
+    dpg.set_value("output_dsc_tag", "")
+
     global output_image_texture_tag
     if output_image_texture_tag is not None:
         dpg.delete_item(output_image_texture_tag)
@@ -99,6 +101,7 @@ def apply_output(sender, app_data, user_data):
         height, width, channels = output.shape
         dpg_output = convert_cv_to_dpg_image(output)
         output_image_texture_tag = register_dpg_texture(dpg_output, "Output image", width, height, False)
+        dpg.set_value("output_dsc_tag", f"{width}x{height}")
 
 
     output_texture_tag = BLACK_TEXTURE if output_image_texture_tag is None else output_image_texture_tag
@@ -139,6 +142,7 @@ def app():
     (window_pos, window_size, image_size) = calculate_output_image_window()
     with dpg.window(label="Output image", tag=OUTPUT_WINDOW_TAG, no_close=True, no_collapse=True, no_resize=True, pos=window_pos, width=window_size[0], height=window_size[1]) as prev_window:
         image_item = dpg.add_image(BLACK_TEXTURE, width=image_size[0], height=image_size[1], tag=OUTPUT_IMAGE_ITEM_TAG)
+        dsc_text_item = dpg.add_text("", tag="output_dsc_tag")
         dpg.add_button(label="Save image", callback=update_image_texture, tag="btn", user_data=image_item)
 
     with dpg.viewport_menu_bar():
@@ -161,7 +165,7 @@ def app():
             with dpg.menu(label="Utils"):
                 utils_nodes = [
                     ("Weighted merge", lambda: create_node(WeightedMergeNode, editor)),
-                    ("One to n channels", lambda: create_node(OneToNChannels, editor))
+                    ("One to n channels", lambda: create_node(OneToNChannels, editor)),
                     ("Resize", lambda: create_node(ResizeNode, editor)),
                 ]
                 for label, cbk in utils_nodes:

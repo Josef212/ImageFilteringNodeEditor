@@ -41,13 +41,13 @@ def load_texture(img_path):
 
 def calculate_output_image_window():
     window_width = 500#350
-    window_height = 450#320
+    window_height = 490#320
     viewport_width = dpg.get_viewport_width()
     viewport_height = dpg.get_viewport_height()
     extra_margin_x = 25
     extra_margin_y = 48
     image_width = window_width * 0.95
-    image_height = (window_height - 60)
+    image_height = (window_height - 85)
 
     window_pos = (viewport_width - window_width - extra_margin_x, viewport_height - window_height - extra_margin_y)
     window_size = (window_width, window_height)

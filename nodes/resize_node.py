@@ -49,6 +49,6 @@ class ResizeNode(BaseNode):
         target_height = height * (self.percentage / 100.0)
 
         # TODO: Expose the interpolation as field
-        ret = cv2.resize(img, (w, h), interpolation = cv2.INTER_AREA)
+        ret = cv2.resize(img, (int(target_width), int(target_height)), interpolation = cv2.INTER_AREA)
 
         return ret
